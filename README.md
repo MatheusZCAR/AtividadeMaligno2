@@ -1,61 +1,75 @@
-## Comandos de Compilação e Execução:
+# README – Trabalho 2
+# Ordenação Distribuída com Merge Sort Paralelo
 
-### 1. Compilar o código:
-```bash
+## Comandos de Compilação e Execução
+
+### 1. Compilar o código
 javac -d bin src/*.java
-```
 
-### 2. Executar o servidor R (Receptor):
-```bash
+### 2. Executar o servidor R (Receptor)
 java -cp bin R
-```
 
-### 3. Executar o cliente Distribuidor:
-```bash
+### 3. Executar o cliente Distribuidor
 java -cp bin Distribuidor
-```
 
-## O que aconteceu na demonstração:
+### 4. Executar a versão Sequencial (para comparação)
+java -cp bin OrdenacaoSequencial
 
-**Servidor R (Receptor):**
-- ✅ Iniciou corretamente na porta 12345
-- ✅ Detectou 20 processadores disponíveis
-- ✅ Aceitou múltiplas conexões do cliente
-- ✅ Recebeu e processou ComunicadoEncerramento de cada conexão
 
-**Cliente Distribuidor:**
-- ✅ Conectou com sucesso ao servidor R
-- ✅ Enviou ComunicadoEncerramento para todos os servidores
-- ⚠️ Teve erro na entrada de dados (esperava número inteiro)
+# O que aconteceu na demonstração
 
-## Demonstração do Comportamento com Múltiplos Clientes:
+## Servidor R (Receptor):
+- Iniciou corretamente na porta 12345
+- Detectou corretamente a quantidade de processadores disponíveis
+- Recebeu partes do vetor enviadas pelo Distribuidor
+- Ordenou cada subvetor em paralelo com múltiplas threads
+- Realizou merge interno das partes ordenadas
+- Enviou o subvetor ordenado de volta ao cliente
+- Recebeu e processou ComunicadoEncerramento sem erros
 
-O que vimos nos logs mostra exatamente o comportamento descrito no documento:
+## Cliente Distribuidor:
+- Gerou o vetor grande de bytes
+- Dividiu o vetor entre os servidores
+- Criou threads clientes para enviar subvetores
+- Recebeu subvetores ordenados dos R
+- Fez o merge final paralelo no cliente
+- Salvou o vetor final ordenado em um arquivo .txt fornecido pelo usuário
+- Enviou ComunicadoEncerramento para todos os servidores ao finalizar
+- Em um teste houve erro de entrada de dados do usuário (esperava número inteiro), mas não comprometeu a lógica principal
 
-1. **Comportamento Sequencial**: O servidor R atende um cliente por vez
-2. **Múltiplas Conexões**: Cada cliente cria uma nova conexão
-3. **Processamento Individual**: Cada conexão é processada separadamente
-4. **Encerramento Limpo**: Cada cliente envia ComunicadoEncerramento
 
-Para testar com dados reais, você pode executar:
-```bash
+# Demonstração do comportamento distribuído e paralelo
+
+1. Ordenação Distribuída  
+   O vetor é dividido e enviado para diferentes servidores ordenarem simultaneamente.
+
+2. Merge Sort Paralelo nos Servidores (R)  
+   Cada servidor divide sua parte em blocos menores, cria threads ordenadoras e threads juntadoras.
+
+3. Merge Final Paralelo no Cliente (Distribuidor)  
+   Os subvetores chegam ordenados e o cliente executa merges 2 a 2 também paralelos.
+
+4. Conexões Independentes  
+   Cada cliente cria sua própria conexão com o R e é atendido separadamente.
+
+5. Encerramento Limpo  
+   O cliente envia ComunicadoEncerramento para cada servidor antes de encerrar o programa.
+
+
+# Como testar com dados reais
+
+Para enviar automaticamente um vetor grande, por exemplo de 1 milhão de elementos:
+
 echo "1000000" | java -cp bin Distribuidor
-```
-
-Isso enviará um vetor de 1 milhão de elementos para o servidor R processar.
 
 
-### Relatos dos integrantes
+# Relatos dos Integrantes
 
+## Matheus:
+O desenvolvimento deste segundo projeto ampliou bastante os desafios do primeiro. A introdução do Merge Sort paralelo nos servidores e do merge final paralelo no distribuidor exigiu uma boa compreensão da decomposição do problema e do uso coordenado de threads. Além disso, gerenciar sockets enquanto várias threads estavam ativas trouxe um alto nível de atenção, especialmente ao garantir que cada conexão fosse encerrada de forma limpa. A maior dificuldade foi garantir que todas as partes ordenadas se unissem corretamente no final. Os testes foram essenciais para detectar erros de merge e problemas de concorrência. No final, o trabalho consolidou fortemente minha compreensão de distribuição de tarefas e ordenação paralela.
 
-####  Matheus:
+## Manoel:
+A evolução do Trabalho 1 para o Trabalho 2 representou um aumento significativo na complexidade. Implementar a comunicação básica novamente foi simples, mas adaptar a lógica para ordenação paralela exigiu um estudo mais profundo. Dividir vetores, sincronizar merges, garantir que cada thread operasse sem conflitos — tudo isso se mostrou um excelente desafio. O aprendizado principal foi sobre o impacto das estratégias de paralelização no desempenho e como pequenos ajustes podem gerar grandes diferenças. Foi uma oportunidade valiosa para reforçar conceitos de programação concorrente e sistemas distribuídos.
 
-O desenvolvimento deste projeto nos trouxe vários desafios, posso citar como sendo os principais: o tempo para a realização do projeto, tivemos que manejar bem as tarefas para cada um, caso contrário não teríamos tempo para acabar o projeto; a integração do trabalho que cada um fez, que as vezes gerou certa incompatibilidade devido a por exemplo, nomes de variáveis; a interpretação do enunciado em geral nos trouxe certas confusões, como por exemplo na obtenção dos IPs dos computadores através do IP config, em que não sabíamos ao certo no momento qual era o IP que deveria ser utilizado para deixar hard-coded no projeto. Por fim, os testes foram muito úteis para eliminar dúvidas e até mesmos erros escondidos do projeto, como por exemplo os servidores aceitarem mais de uma máquina ao mesmo tempo.
-
-#### Manoel: 
-
-A implementação da comunicação básica com Sockets foi um ótimo exercício sobre arquitetura cliente-servidor. No entanto, a verdadeira complexidade surgiu ao introduzir Threads para gerenciar a concorrência. Garantir que múltiplas tarefas pudessem executar em paralelo, acessando recursos de forma segura e sem conflitos, exigiu um estudo aprofundado sobre sincronização.
-​Foi um aprendizado intenso que solidificou meus conhecimentos sobre os desafios práticos da programação concorrente e da comunicação em rede.
-
-
-#### Beatrix
+## Beatriz:
+Participar deste projeto foi uma experiência essencial para compreender o funcionamento real de sistemas distribuídos. No início, o conceito de dividir um problema em subpartes que seriam enviadas a diferentes servidores parecia abstrato, mas ao longo da implementação passou a fazer sentido de forma prática. A parte mais desafiadora foi garantir que o merge dos vetores retornados pelos servidores fosse feito corretamente e de maneira paralela, preservando a ordem. Também aprendi bastante sobre comunicação via sockets, especialmente a importância do uso correto de streams e do envio explícito do ComunicadoEncerramento. Além disso, trabalhar com múltiplas threads ao mesmo tempo exigiu bastante atenção para evitar conflitos e erros inesperados. No geral, o projeto contribuiu muito para minha evolução em programação concorrente e distribuições de tarefas.
