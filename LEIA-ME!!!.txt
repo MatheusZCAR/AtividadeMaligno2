@@ -1,0 +1,4 @@
+Classes pedidas na atividade (extensão .java, a .class foi gerada após compilar),
+estão localizadas dentro da pasta "src". Usamos uma extensão no VSCODE que permite a criação de projetos java, estas pastas foram geradas por essa extensão.
+
+Prints dos testes e relatos de desenvolvimento: dentro do PDF de nome "Trabalho Programação Paralela e Distribuida - Testes e Relatos 2"
